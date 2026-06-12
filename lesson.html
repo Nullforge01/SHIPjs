@@ -1,251 +1,214 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lesson | Ship.js</title>
-  <link rel="stylesheet" href="css/main.css">
-  <script src="https://unpkg.com/monaco-editor@0.44.0/min/vs/loader.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson — ShipJS</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
 </head>
 <body>
-  <div id="app">
-    <header class="topbar">
-      <div class="wrap">
-        <div class="logo-wrap">
-          <a href="/course.html" class="back-btn">←</a>
-          <div class="logo">Ship<span>.js</span></div>
-        </div>
-        <div class="stats">
-          <div class="pill"><span id="xp-display">0</span> XP</div>
-          <div class="timer"><span id="timer-display">0:00</span></div>
-        </div>
+<div id="app">
+  <header class="topbar">
+    <div class="wrap">
+      <div class="logo-wrap">
+        <a href="/course.html" class="back-btn">←</a>
+        <a href="/" class="logo">Ship<span>.js</span></a>
       </div>
-    </header>
-
-    <main id="view-lesson">
-      <div class="lesson-grid">
-        <aside class="lesson-sidebar">
-          <div class="lesson-meta">
-            <div id="lesson-badge" class="badge">Lesson</div>
-            <h2 id="lesson-title">Loading...</h2>
-            <div class="muted mono" id="lesson-filename">file.js</div>
-          </div>
-          <div id="lesson-docs" class="lesson-docs">
-            <div class="muted">Loading docs...</div>
-          </div>
-          <div class="lesson-actions">
-            <button id="hint-btn" class="btn btn-secondary">Hint</button>
-            <button id="solution-btn" class="btn btn-secondary">Solution</button>
-          </div>
-        </aside>
-
-        <section class="lesson-workspace">
-          <div class="editor-header">
-            <div class="tabs">
-              <div class="tab active">code.js</div>
-            </div>
-            <div class="editor-actions">
-              <button id="run-btn" class="btn btn-primary">
-                <span>Run Tests</span>
-                <kbd>⌘↵</kbd>
-              </button>
-            </div>
-          </div>
-          <div id="editor" class="editor"></div>
-          
-          <div class="output-panel">
-            <div class="output-tabs">
-              <button class="output-tab active" data-tab="console">Console</button>
-              <button class="output-tab" data-tab="tests">Tests</button>
-            </div>
-            <div id="console-output" class="output-content active"></div>
-            <div id="tests-output" class="output-content"></div>
-          </div>
-        </section>
-      </div>
-    </main>
-  </div>
-
-  <!-- Modals -->
-  <div id="hint-modal" class="modal">
-    <div class="modal-content">
-      <h3>Hint</h3>
-      <p id="hint-text"></p>
-      <button class="btn btn-primary" onclick="closeModal('hint-modal')">Got it</button>
-    </div>
-  </div>
-
-  <div id="success-modal" class="modal">
-    <div class="modal-content">
-      <div class="success-icon">🎉</div>
-      <h3>Shipped!</h3>
-      <p>+<span id="xp-earned">0</span> XP earned</p>
-      <div class="modal-actions">
-        <button id="next-lesson-btn" class="btn btn-primary">Next Lesson →</button>
-        <a href="/course.html" class="btn btn-secondary">Back to Course</a>
+      <div class="stats">
+        <div class="pill"><span data-xp>0</span> XP</div>
+        <div class="timer"><span data-timer>0:00</span></div>
       </div>
     </div>
-  </div>
+  </header>
 
-  <script type="module">
-    import { ShipJS } from './js/app.js';
-    import { Editor } from './js/editor.js';
-    import { TestRunner } from './js/tests.js';
-    
-    const app = new ShipJS();
-    await app.init();
-    
-    const params = new URLSearchParams(window.location.search);
-    const lessonId = params.get('id');
-    
-    if (!lessonId) {
-      window.location.href = '/course.html';
-    }
-    
-    const courseData = await fetch('./data/course.json').then(r => r.json());
-    const lesson = findLesson(courseData.modules, lessonId);
-    
-    if (!lesson) {
-      window.location.href = '/course.html';
-    }
-    
-    // Init UI
-    document.getElementById('lesson-title').textContent = lesson.title;
-    document.getElementById('lesson-filename').textContent = lesson.fileName;
-    document.getElementById('lesson-badge').textContent = lesson.type === 'project' ? 'Project' : 'Lesson';
-    document.getElementById('lesson-docs').innerHTML = lesson.docs;
-    document.getElementById('xp-earned').textContent = lesson.xp;
-    
-    // Init editor
-    const editor = new Editor('editor', lesson.starterCode);
-    const testRunner = new TestRunner();
-    
-    let hintIndex = 0;
-    let currentFile = loadFile(lesson.fileName) || lesson.starterCode;
-    editor.setValue(currentFile);
-    
-    // Events
-    document.getElementById('run-btn').onclick = runTests;
-    document.getElementById('hint-btn').onclick = showHint;
-    document.getElementById('solution-btn').onclick = showSolution;
-    
-    // Auto-save
-    editor.onChange((code) => {
-      saveFile(lesson.fileName, code);
-    });
-    
-    // Cmd+Enter to run
-    document.addEventListener('keydown', (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-        e.preventDefault();
-        runTests();
-      }
-    });
-    
-    async function runTests() {
-      const code = editor.getValue();
-      const results = await testRunner.run(code, lesson.tests);
-      renderTests(results);
-      renderConsole(results.logs);
+  <main class="lesson-grid">
+    <aside class="lesson-sidebar">
+      <div class="lesson-meta">
+        <div class="muted" style="font-size: 12px; text-transform: uppercase;">Lesson</div>
+        <h2 id="lesson-title">Loading...</h2>
+        <div class="muted" style="font-size: 14px;"><span id="lesson-xp">0</span> XP</div>
+      </div>
       
-      if (results.passed) {
-        app.completeLesson(lesson.id, lesson.xp);
-        document.getElementById('success-modal').classList.add('active');
-        
-        // Setup next lesson button
-        const nextLesson = findNextLesson(courseData.modules, lessonId);
-        const nextBtn = document.getElementById('next-lesson-btn');
-        if (nextLesson) {
-          nextBtn.onclick = () => window.location.href = `/lesson.html?id=${nextLesson.id}`;
-        } else {
-          nextBtn.textContent = 'Back to Course';
-          nextBtn.onclick = () => window.location.href = '/course.html';
-        }
-      }
+      <div id="lesson-docs" class="lesson-docs"></div>
       
-      switchTab('tests');
+      <div class="lesson-actions">
+        <button id="hint-btn" class="btn btn-secondary" style="flex: 1;">Hint 0/3</button>
+        <button id="solution-btn" class="btn btn-secondary" style="flex: 1;">Solution</button>
+      </div>
+    </aside>
+
+    <div class="lesson-workspace">
+      <div class="editor-header">
+        <div class="tabs">
+          <div class="tab active mono" id="file-name">app.js</div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button id="reset-btn" class="btn btn-secondary">Reset</button>
+          <button id="run-btn" class="btn btn-primary">Run Tests <kbd>⌘⏎</kbd></button>
+        </div>
+      </div>
+      
+      <div id="editor" class="editor"></div>
+      
+      <div class="output-panel">
+        <div class="output-tabs">
+          <button class="output-tab active" data-tab="tests">Tests</button>
+          <button class="output-tab" data-tab="console">Console</button>
+        </div>
+        <div id="tests-output" class="output-content active"></div>
+        <div id="console-output" class="output-content"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="success-modal" class="modal">
+  <div class="modal-content">
+    <div class="success-icon">✓</div>
+    <h3>Tests Passed!</h3>
+    <p>+<span id="earned-xp">0</span> XP earned</p>
+    <div class="modal-actions">
+      <button id="next-lesson-btn" class="btn btn-primary">Next Lesson →</button>
+      <a href="/course.html" class="btn btn-secondary">Back to Course</a>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { ShipJS } from './js/app.js';
+  import { createEditor } from './js/editor.js';
+  import { runTests } from './js/tests.js';
+  
+  const app = new ShipJS();
+  await app.init();
+  
+  const params = new URLSearchParams(location.search);
+  const lessonId = params.get('id');
+  
+  if (!lessonId) location.href = '/course.html';
+  
+  const course = await app.loadCourse();
+  const lesson = course.modules.flatMap(m => m.lessons).find(l => l.id === lessonId);
+  
+  if (!lesson) location.href = '/course.html';
+  
+  // Populate UI
+  document.title = `${lesson.title} — ShipJS`;
+  document.getElementById('lesson-title').textContent = lesson.title;
+  document.getElementById('lesson-xp').textContent = lesson.xp;
+  document.getElementById('file-name').textContent = lesson.fileName;
+  document.getElementById('lesson-docs').innerHTML = lesson.docs;
+  
+  // Monaco setup
+  const savedCode = app.getLessonCode(lessonId);
+  const editor = await createEditor('editor', savedCode || lesson.starterCode);
+  
+  // Auto-save
+  editor.onDidChangeModelContent(() => {
+    app.saveLessonCode(lessonId, editor.getValue());
+  });
+  
+  // Hints
+  let hintIndex = 0;
+  const hintBtn = document.getElementById('hint-btn');
+  hintBtn.textContent = `Hint ${hintIndex}/${lesson.hints.length}`;
+  hintBtn.onclick = () => {
+    if (hintIndex < lesson.hints.length) {
+      app.toast(lesson.hints[hintIndex], 'info');
+      hintIndex++;
+      hintBtn.textContent = `Hint ${hintIndex}/${lesson.hints.length}`;
     }
-    
-    function showHint() {
-      if (hintIndex < lesson.hints.length) {
-        document.getElementById('hint-text').textContent = lesson.hints[hintIndex];
-        document.getElementById('hint-modal').classList.add('active');
-        hintIndex++;
-      } else {
-        document.getElementById('hint-text').textContent = 'No more hints. Check the solution.';
-        document.getElementById('hint-modal').classList.add('active');
-      }
+  };
+  
+  // Solution
+  document.getElementById('solution-btn').onclick = () => {
+    if (confirm('View solution? You won\'t earn XP for this lesson.')) {
+      editor.setValue(lesson.solution);
     }
-    
-    function showSolution() {
-      if (confirm('View solution? You won\'t earn XP for this lesson.')) {
-        editor.setValue(lesson.solution);
-        app.markViewedSolution(lesson.id);
-      }
+  };
+  
+  // Reset
+  document.getElementById('reset-btn').onclick = () => {
+    if (confirm('Reset to starter code?')) {
+      editor.setValue(lesson.starterCode);
     }
+  };
+  
+  // Run tests
+  const runBtn = document.getElementById('run-btn');
+  const testsOutput = document.getElementById('tests-output');
+  const consoleOutput = document.getElementById('console-output');
+  
+  async function run() {
+    runBtn.disabled = true;
+    runBtn.textContent = 'Running...';
     
-    function renderTests(results) {
-      const out = document.getElementById('tests-output');
-      out.innerHTML = results.tests.map(t => `
-        <div class="test-result ${t.pass ? 'pass' : 'fail'}">
-          <span class="test-icon">${t.pass ? '✓' : '✗'}</span>
-          <span>${t.name}</span>
+    consoleOutput.innerHTML = '';
+    testsOutput.innerHTML = '<div class="muted">Running tests...</div>';
+    
+    const code = editor.getValue();
+    const logs = [];
+    
+    try {
+      const results = await runTests(code, lesson.tests, (log) => {
+        logs.push(log);
+        consoleOutput.innerHTML += `<div class="log-line">${log}</div>`;
+      });
+      
+      testsOutput.innerHTML = results.map(r => `
+        <div class="test-result ${r.pass ? 'pass' : 'fail'}">
+          <span>${r.pass ? '✓' : '✗'}</span>
+          <span>${r.name}</span>
         </div>
       `).join('');
+      
+      if (results.every(r => r.pass)) {
+        const firstTime = app.completeLesson(lessonId, lesson.xp);
+        if (firstTime) {
+          document.getElementById('earned-xp').textContent = lesson.xp;
+          document.getElementById('success-modal').classList.add('active');
+        } else {
+          app.toast('Already completed — no XP earned', 'info');
+        }
+      }
+    } catch (e) {
+      testsOutput.innerHTML = `<div class="test-result fail"><span>✗</span><span>Error: ${e.message}</span></div>`;
+      consoleOutput.innerHTML += `<div class="log-line" style="color: var(--error);">Error: ${e.message}</div>`;
     }
     
-    function renderConsole(logs) {
-      const out = document.getElementById('console-output');
-      out.innerHTML = logs.map(l => `<div class="log-line">${l}</div>`).join('') || '<div class="muted">No output</div>';
+    runBtn.disabled = false;
+    runBtn.textContent = 'Run Tests ⌘⏎';
+  }
+  
+  runBtn.onclick = run;
+  
+  // Keyboard shortcut
+  document.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      e.preventDefault();
+      run();
     }
-    
-    function switchTab(tab) {
+  });
+  
+  // Tab switching
+  document.querySelectorAll('.output-tab').forEach(tab => {
+    tab.onclick = () => {
       document.querySelectorAll('.output-tab').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.output-content').forEach(c => c.classList.remove('active'));
-      document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
-      document.getElementById(`${tab}-output`).classList.add('active');
-    }
-    
-    document.querySelectorAll('.output-tab').forEach(tab => {
-      tab.onclick = () => switchTab(tab.dataset.tab);
-    });
-    
-    window.closeModal = (id) => {
-      document.getElementById(id).classList.remove('active');
+      tab.classList.add('active');
+      document.getElementById(`${tab.dataset.tab}-output`).classList.add('active');
     };
-    
-    // Helpers
-    function findLesson(modules, id) {
-      for (const mod of modules) {
-        const lesson = mod.lessons.find(l => l.id === id);
-        if (lesson) return lesson;
-      }
-    }
-    
-    function findNextLesson(modules, currentId) {
-      const all = modules.flatMap(m => m.lessons);
-      const idx = all.findIndex(l => l.id === currentId);
-      return all[idx + 1];
-    }
-    
-    function loadFile(name) {
-      return localStorage.getItem(`shipjs_file_${name}`);
-    }
-    
-    function saveFile(name, content) {
-      localStorage.setItem(`shipjs_file_${name}`, content);
-    }
-    
-    // Update stats
-    const progress = app.getProgress();
-    document.getElementById('xp-display').textContent = progress.xp;
-    document.getElementById('timer-display').textContent = formatTime(progress.timeSec);
-    
-    function formatTime(sec) {
-      const m = Math.floor(sec / 60);
-      const s = sec % 60;
-      return `${m}:${s.toString().padStart(2, '0')}`;
-    }
-  </script>
+  });
+  
+  // Success modal
+  document.getElementById('next-lesson-btn').onclick = () => {
+    const allLessons = course.modules.flatMap(m => m.lessons);
+    const currentIndex = allLessons.findIndex(l => l.id === lessonId);
+    const next = allLessons[currentIndex + 1];
+    location.href = next ? `/lesson.html?id=${next.id}` : '/course.html';
+  };
+</script>
 </body>
-          </html>
+        </html>
