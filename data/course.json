@@ -6,144 +6,71 @@
       "title": "JS Fundamentals",
       "description": "Variables, functions, arrays. Ship your first function.",
       "lessons": [
-        {
-          "id": "m1l1",
-          "title": "Console.log",
-          "type": "lesson",
-          "fileName": "hello.js",
-          "xp": 20,
-          "docs": "<p>Use <code>console.log()</code> to print to the console. This is your first shipping tool.</p><p><strong>Task:</strong> Log the string <code>\"I ship\"</code></p>",
-          "starterCode": "// Log \"I ship\" to the console\n",
-          "solution": "console.log(\"I ship\");",
-          "hints": [
-            "Use console.log() with parentheses",
-            "Put your string in quotes inside the parentheses",
-            "The exact string is \"I ship\""
-          ],
-          "tests": [
-            {
-              "name": "Logs 'I ship'",
-              "type": "log",
-              "check": "I ship"
-            }
-          ]
-        },
-        {
-          "id": "m1l2",
-          "title": "Variables",
-          "type": "lesson",
-          "fileName": "vars.js",
-          "xp": 30,
-          "docs": "<p>Declare variables with <code>const</code> and <code>let</code>. Use <code>const</code> by default.</p><p><strong>Task:</strong> Create a const called <code>shipName</code> set to <code>\"ShipJS\"</code> and log it.</p>",
-          "starterCode": "// Create shipName and log it\n",
-          "solution": "const shipName = \"ShipJS\";\nconsole.log(shipName);",
-          "hints": [
-            "Use: const shipName = \"ShipJS\";",
-            "Then log it with console.log(shipName);",
-            "const means the value can't be reassigned"
-          ],
-          "tests": [
-            {
-              "name": "Declares shipName with const",
-              "type": "regex",
-              "check": "const\\s+shipName\\s*=\\s*[\"']ShipJS[\"']"
-            },
-            {
-              "name": "Logs ShipJS",
-              "type": "log",
-              "check": "ShipJS"
-            }
-          ]
-        },
-        {
-          "id": "m1l3",
-          "title": "Ship Function",
-          "type": "project",
-          "fileName": "ship.js",
-          "xp": 50,
-          "docs": "<p>Functions let you reuse code. Arrow functions are modern JS.</p><p><strong>Task:</strong> Create an arrow function <code>ship</code> that takes a <code>name</code> and returns <code>`Shipping ${name}`</code></p><p>Then call <code>console.log(ship(\"Code\"))</code></p>",
-          "starterCode": "// Create ship function and log ship(\"Code\")\n",
-          "solution": "const ship = (name) => `Shipping ${name}`;\nconsole.log(ship(\"Code\"));",
-          "hints": [
-            "Syntax: const ship = (name) => `Shipping ${name}`;",
-            "Use backticks for template literals",
-            "Don't forget to call console.log(ship(\"Code\"))"
-          ],
-          "tests": [
-            {
-              "name": "Defines ship as arrow function",
-              "type": "regex",
-              "check": "const\\s+ship\\s*=\\s*\\([^)]*\\)\\s*=>"
-            },
-            {
-              "name": "Logs 'Shipping Code'",
-              "type": "log",
-              "check": "Shipping Code"
-            }
-          ]
-        }
+        {"id":"m1l1","title":"Console.log","type":"lesson","fileName":"hello.js","xp":20,"docs":"<p>Log <code>\"I ship\"</code></p>","starterCode":"// Log \"I ship\"\n","solution":"console.log(\"I ship\");","hints":["Use console.log()","Put string in quotes"],"tests":[{"name":"Logs 'I ship'","type":"log","check":"I ship"}]},
+        {"id":"m1l2","title":"Variables: const vs let","type":"lesson","fileName":"vars.js","xp":30,"docs":"<p>Create <code>const shipName = \"ShipJS\"</code> and log it.</p>","starterCode":"// Create shipName\n","solution":"const shipName = \"ShipJS\";\nconsole.log(shipName);","hints":["const shipName = \"ShipJS\";"],"tests":[{"name":"Declares shipName","type":"regex","check":"const\\s+shipName\\s*=\\s*[\"']ShipJS[\"']"},{"name":"Logs ShipJS","type":"log","check":"ShipJS"}]},
+        {"id":"m1l3","title":"Numbers & Math","type":"lesson","fileName":"math.js","xp":30,"docs":"<p>Log <code>10 + 5 * 2</code></p>","starterCode":"// Log 10 + 5 * 2\n","solution":"console.log(10 + 5 * 2);","hints":["Answer is 20"],"tests":[{"name":"Logs 20","type":"log","check":"20"}]},
+        {"id":"m1l4","title":"Strings & Template Literals","type":"lesson","fileName":"strings.js","xp":30,"docs":"<p>Log <code>`Hello ${name}`</code> with <code>name = \"Coder\"</code></p>","starterCode":"// Template literal\n","solution":"const name = \"Coder\";\nconsole.log(`Hello ${name}`);","hints":["Use backticks"],"tests":[{"name":"Uses template literal","type":"regex","check":"`.*\\$\\{.*\\}.*`"},{"name":"Logs 'Hello Coder'","type":"log","check":"Hello Coder"}]},
+        {"id":"m1l5","title":"Booleans & Comparisons","type":"lesson","fileName":"bool.js","xp":30,"docs":"<p>Log result of <code>5 === 5</code></p>","starterCode":"// Log 5 === 5\n","solution":"console.log(5 === 5);","hints":["Should log true"],"tests":[{"name":"Logs true","type":"log","check":"true"}]},
+        {"id":"m1l6","title":"Functions","type":"lesson","fileName":"func.js","xp":40,"docs":"<p>Create <code>double</code> that returns <code>n * 2</code>. Log <code>double(5)</code></p>","starterCode":"// Create double function\n","solution":"const double = (n) => n * 2;\nconsole.log(double(5));","hints":["const double = (n) => n * 2;"],"tests":[{"name":"Defines double","type":"regex","check":"const\\s+double\\s*=.*=>"},{"name":"Logs 10","type":"log","check":"10"}]},
+        {"id":"m1l7","title":"Ship Function Project","type":"project","fileName":"ship.js","xp":50,"docs":"<p>Create <code>ship(name)</code> returning <code>`Shipping ${name}`</code>. Log <code>ship(\"Code\")</code></p>","starterCode":"// Create ship function\n","solution":"const ship = (name) => `Shipping ${name}`;\nconsole.log(ship(\"Code\"));","hints":["Use template literal"],"tests":[{"name":"Defines ship","type":"regex","check":"const\\s+ship\\s*=.*=>"},{"name":"Logs 'Shipping Code'","type":"log","check":"Shipping Code"}]}
       ]
     },
     {
       "id": "m2",
+      "title": "Control Flow",
+      "description": "If/else, loops, ternary. Make decisions in code.",
+      "lessons": [
+        {"id":"m2l1","title":"If Statements","type":"lesson","fileName":"if.js","xp":40,"docs":"<p>If <code>5 > 3</code> log <code>\"Big\"</code></p>","starterCode":"// if statement\n","solution":"if (5 > 3) {\n console.log(\"Big\");\n}","hints":["if (5 > 3) {...}"],"tests":[{"name":"Logs 'Big'","type":"log","check":"Big"}]},
+        {"id":"m2l2","title":"If/Else","type":"lesson","fileName":"else.js","xp":40,"docs":"<p>If <code>2 > 5</code> log <code>\"Yes\"</code> else log <code>\"No\"</code></p>","starterCode":"// if else\n","solution":"if (2 > 5) {\n console.log(\"Yes\");\n} else {\n console.log(\"No\");\n}","hints":["2 > 5 is false"],"tests":[{"name":"Logs 'No'","type":"log","check":"No"}]},
+        {"id":"m2l3","title":"Ternary Operator","type":"lesson","fileName":"ternary.js","xp":40,"docs":"<p>Log <code>10 > 5? \"Yes\" : \"No\"</code></p>","starterCode":"// ternary\n","solution":"console.log(10 > 5? \"Yes\" : \"No\");","hints":["condition? yes : no"],"tests":[{"name":"Logs 'Yes'","type":"log","check":"Yes"}]},
+        {"id":"m2l4","title":"For Loops","type":"lesson","fileName":"for.js","xp":40,"docs":"<p>Log 0,1,2 with for loop</p>","starterCode":"// for loop\n","solution":"for (let i = 0; i < 3; i++) {\n console.log(i);\n}","hints":["i < 3"],"tests":[{"name":"Logs 0","type":"log","check":"0"},{"name":"Logs 1","type":"log","check":"1"},{"name":"Logs 2","type":"log","check":"2"}]},
+        {"id":"m2l5","title":"While Loops","type":"lesson","fileName":"while.js","xp":40,"docs":"<p>Log 0,1,2 with while. Start <code>let i = 0</code></p>","starterCode":"let i = 0;\n// while loop\n","solution":"let i = 0;\nwhile (i < 3) {\n console.log(i);\n i++;\n}","hints":["Don't forget i++"],"tests":[{"name":"Logs 2","type":"log","check":"2"}]}
+      ]
+    },
+    {
+      "id": "m3",
+      "title": "Arrays & Objects",
+      "description": "Store collections. Map, filter, reduce.",
+      "lessons": [
+        {"id":"m3l1","title":"Arrays","type":"lesson","fileName":"arrays.js","xp":40,"docs":"<p>Create <code>nums = [1,2,3]</code> and log <code>nums[1]</code></p>","starterCode":"// Create array\n","solution":"const nums = [1,2,3];\nconsole.log(nums[1]);","hints":["Arrays 0-indexed"],"tests":[{"name":"Logs 2","type":"log","check":"2"}]},
+        {"id":"m3l2","title":"Array.push & length","type":"lesson","fileName":"push.js","xp":40,"docs":"<p>Create empty <code>arr</code>, push <code>\"ship\"</code>, log <code>arr.length</code></p>","starterCode":"// Push to array\n","solution":"const arr = [];\narr.push(\"ship\");\nconsole.log(arr.length);","hints":["arr.push(\"ship\")"],"tests":[{"name":"Logs 1","type":"log","check":"1"}]},
+        {"id":"m3l3","title":"Array.map","type":"lesson","fileName":"map.js","xp":50,"docs":"<p>Double each number in <code>[1,2,3]</code> with map</p>","starterCode":"const nums = [1,2,3];\n// Map to double\n","solution":"const nums = [1,2,3];\nconst doubled = nums.map(n => n * 2);\nconsole.log(doubled);","hints":["nums.map(n => n * 2)"],"tests":[{"name":"Logs [2,4,6]","type":"log","check":"[2,4,6]"}]},
+        {"id":"m3l4","title":"Array.filter","type":"lesson","fileName":"filter.js","xp":50,"docs":"<p>Filter <code>[1,2,3,4]</code> for evens only</p>","starterCode":"const nums = [1,2,3,4];\n// Filter evens\n","solution":"const nums = [1,2,3,4];\nconst evens = nums.filter(n => n % 2 === 0);\nconsole.log(evens);","hints":["n % 2 === 0"],"tests":[{"name":"Logs [2,4]","type":"log","check":"[2,4]"}]},
+        {"id":"m3l5","title":"Objects","type":"lesson","fileName":"objects.js","xp":40,"docs":"<p>Create <code>user = {name: \"Ship\"}</code> and log <code>user.name</code></p>","starterCode":"// Create object\n","solution":"const user = {name: \"Ship\"};\nconsole.log(user.name);","hints":["Dot notation"],"tests":[{"name":"Logs 'Ship'","type":"log","check":"Ship"}]},
+        {"id":"m3l6","title":"Destructuring","type":"lesson","fileName":"destruct.js","xp":50,"docs":"<p>Destructure <code>name</code> from <code>{name: \"JS\", year: 1995}</code></p>","starterCode":"const lang = {name: \"JS\", year: 1995};\n// Destructure\n","solution":"const lang = {name: \"JS\", year: 1995};\nconst {name} = lang;\nconsole.log(name);","hints":["const {name} = lang;"],"tests":[{"name":"Logs 'JS'","type":"log","check":"JS"}]},
+        {"id":"m3l7","title":"Array Methods Project","type":"project","fileName":"methods.js","xp":60,"docs":"<p>From <code>[1,2,3,4,5]</code>, keep evens then double them</p>","starterCode":"const nums = [1,2,3,4,5];\n// Chain filter map\n","solution":"const nums = [1,2,3,4,5];\nconst result = nums.filter(n => n % 2 === 0).map(n => n * 2);\nconsole.log(result);","hints":[".filter().map()"],"tests":[{"name":"Logs [4,8]","type":"log","check":"[4,8]"}]}
+      ]
+    },
+    {
+      "id": "m4",
       "title": "DOM & Events",
       "description": "Make pages interactive. Query, listen, update.",
       "lessons": [
-        {
-          "id": "m2l1",
-          "title": "Query Selector",
-          "type": "lesson",
-          "fileName": "query.js",
-          "xp": 40,
-          "docs": "<p>Use <code>document.querySelector()</code> to grab elements.</p><p><strong>Task:</strong> In browser console this would work. For this test, just create a function <code>getTitle</code> that returns <code>document.querySelector('h1').textContent</code></p>",
-          "starterCode": "// Create getTitle function\n",
-          "solution": "const getTitle = () => document.querySelector('h1').textContent;",
-          "hints": [
-            "Use an arrow function",
-            "Return document.querySelector('h1').textContent",
-            "Selectors use CSS syntax"
-          ],
-          "tests": [
-            {
-              "name": "Defines getTitle function",
-              "type": "regex",
-              "check": "const\\s+getTitle\\s*=.*=>"
-            },
-            {
-              "name": "Uses querySelector",
-              "type": "regex",
-              "check": "querySelector\\(['\"]h1['\"]\\)"
-            }
-          ]
-        }
+        {"id":"m4l1","title":"querySelector","type":"lesson","fileName":"query.js","xp":40,"docs":"<p>Create <code>getTitle</code> that returns <code>document.querySelector('h1').textContent</code></p>","starterCode":"// getTitle function\n","solution":"const getTitle = () => document.querySelector('h1').textContent;","hints":["Return querySelector"],"tests":[{"name":"Defines getTitle","type":"regex","check":"const\\s+getTitle\\s*=.*=>"},{"name":"Uses querySelector","type":"regex","check":"querySelector\\(['\"]h1['\"]\\)"}]},
+        {"id":"m4l2","title":"addEventListener","type":"lesson","fileName":"events.js","xp":50,"docs":"<p>Add click listener to <code>button</code> that logs <code>\"clicked\"</code></p>","starterCode":"const button = document.querySelector('button');\n// onClick function\n","solution":"const button = document.querySelector('button');\nconst onClick = () => {\n button.addEventListener('click', () => console.log('clicked'));\n};","hints":["addEventListener('click', fn)"],"tests":[{"name":"Uses addEventListener","type":"regex","check":"addEventListener\\(['\"]click['\"]"}]},
+        {"id":"m4l3","title":"textContent","type":"lesson","fileName":"text.js","xp":40,"docs":"<p>Set <code>h1</code> text to <code>\"Shipped\"</code></p>","starterCode":"// Set h1 text\n","solution":"const setTitle = () => {\n document.querySelector('h1').textContent = 'Shipped';\n};","hints":[".textContent = 'Shipped'"],"tests":[{"name":"Sets textContent","type":"regex","check":"textContent\\s*=\\s*['\"]Shipped['\"]"}]},
+        {"id":"m4l4","title":"Counter Project","type":"project","fileName":"counter.js","xp":60,"docs":"<p><code>let count = 0</code>. Function <code>increment</code> adds 1 and logs</p>","starterCode":"let count = 0;\n// increment function\n","solution":"let count = 0;\nconst increment = () => {\n count++;\n console.log(count);\n};\nincrement();","hints":["count++"],"tests":[{"name":"Declares count","type":"regex","check":"let\\s+count\\s*=\\s*0"},{"name":"Increments count","type":"regex","check":"count\\+\\+"}]}
+      ]
+    },
+    {
+      "id": "m5",
+      "title": "Async & APIs",
+      "description": "Fetch data. Promises. async/await.",
+      "lessons": [
+        {"id":"m5l1","title":"Promises","type":"lesson","fileName":"promise.js","xp":50,"docs":"<p>Create promise that resolves with <code>\"done\"</code>. Log with <code>.then()</code></p>","starterCode":"// Promise\n","solution":"const p = new Promise((resolve) => resolve('done'));\np.then(result => console.log(result));","hints":["new Promise((resolve) =>...)"],"tests":[{"name":"Uses.then","type":"regex","check":"\\.then\\("}]},
+        {"id":"m5l2","title":"async/await","type":"lesson","fileName":"async.js","xp":50,"docs":"<p><code>async function getData()</code> awaits <code>Promise.resolve(\"data\")</code></p>","starterCode":"// async function\n","solution":"async function getData() {\n const data = await Promise.resolve('data');\n console.log(data);\n}\ngetData();","hints":["async function","await Promise"],"tests":[{"name":"Uses async","type":"regex","check":"async\\s+function"},{"name":"Uses await","type":"regex","check":"await"}]},
+        {"id":"m5l3","title":"Fetch API","type":"lesson","fileName":"fetch.js","xp":60,"docs":"<p>Fetch <code>'https://api.github.com'</code> and log <code>response.status</code></p>","starterCode":"// Fetch API\n","solution":"async function checkAPI() {\n const res = await fetch('https://api.github.com');\n console.log(res.status);\n}\ncheckAPI();","hints":["await fetch()"],"tests":[{"name":"Calls fetch","type":"regex","check":"fetch\\(['\"]https://api\\.github\\.com['\"]\\)"}]},
+        {"id":"m5l4","title":"JSON","type":"lesson","fileName":"json.js","xp":50,"docs":"<p>Stringify <code>{ship: true}</code> and log it</p>","starterCode":"// Stringify\n","solution":"const obj = {ship: true};\nconsole.log(JSON.stringify(obj));","hints":["JSON.stringify()"],"tests":[{"name":"Logs JSON","type":"log","check":"{\"ship\":true}"}]},
+        {"id":"m5l5","title":"API Fetch Project","type":"project","fileName":"api.js","xp":70,"docs":"<p>Fetch <code>'https://api.github.com/zen'</code>, get text, log it</p>","starterCode":"// Fetch Zen\n","solution":"async function getZen() {\n const res = await fetch('https://api.github.com/zen');\n const text = await res.text();\n console.log(text);\n}\ngetZen();","hints":["await res.text()"],"tests":[{"name":"Fetches zen","type":"regex","check":"fetch\\(['\"]https://api\\.github\\.com/zen['\"]\\)"},{"name":"Uses text()","type":"regex","check":"\\.text\\(\\)"}]}
       ]
     }
   ],
   "exam": [
-    {
-      "id": "q1",
-      "type": "mcq",
-      "question": "Which declares a constant in JS?",
-      "options": ["var x = 1", "let x = 1", "const x = 1", "constant x = 1"],
-      "answer": 2
-    },
-    {
-      "id": "q2",
-      "type": "mcq",
-      "question": "What does `Array.map()` return?",
-      "options": ["Modifies original array", "A new array", "Nothing", "A string"],
-      "answer": 1
-    },
-    {
-      "id": "q3",
-      "type": "code",
-      "question": "Write a function `double` that takes a number and returns it * 2",
-      "starterCode": "// function double(n) {\n// \n// }\n",
-      "tests": [
-        { "input": 2, "output": 4 },
-        { "input": 5, "output": 10 },
-        { "input": 0, "output": 0 }
-      ]
-    }
+    {"id":"q1","type":"mcq","question":"Which declares a constant in JS?","options":["var x = 1","let x = 1","const x = 1","constant x = 1"],"answer":2},
+    {"id":"q2","type":"mcq","question":"What does `Array.map()` return?","options":["Modifies original array","A new array","Nothing","A string"],"answer":1},
+    {"id":"q3","type":"mcq","question":"How do you handle async code in modern JS?","options":["Callbacks only","async/await","setTimeout","for loops"],"answer":1},
+    {"id":"q4","type":"mcq","question":"What does `===` check?","options":["Value only","Type only","Value and type","Reference"],"answer":2},
+    {"id":"q5","type":"code","question":"Write function `double` that takes n and returns n * 2","starterCode":"// function double(n) {\n// \n// }\n","tests":[{"input":2,"output":4},{"input":5,"output":10},{"input":0,"output":0}]},
+    {"id":"q6","type":"code","question":"Filter array to keep only numbers > 10","starterCode":"const nums = [5, 12, 8, 20, 3];\n// Your code here\n","tests":[{"input":[5,12,8,20,3],"output":[12,20]}]}
   ]
-            }
+        }
