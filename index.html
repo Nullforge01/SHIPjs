@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ShipJS — Stop watching. Start shipping.</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="logo" onclick="showView('landing')">ShipJS</div>
+    <div class="streak">Day <span id="streakCount">4</span>🔥</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-item active" data-view="landing"><span>🏠</span> Playground</div>
+    <div class="nav-item" data-view="dashboard"><span>📚</span> Course</div>
+    <div class="nav-item" data-modal="leaderboardModal"><span>⚡</span> Leaderboard</div>
+    <div class="nav-item" data-view="exam"><span>📝</span> Final Exam</div>
+    <div class="nav-item disabled" id="navCert" data-action="openCertificate"><span>🏆</span> Certificate</div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="xp-label"><span id="xpCount">120</span> XP</div>
+    <div class="xp-bar"><div class="xp-fill" id="xpFill"></div></div>
+    <div class="studio-credit">
+      <span class="studio-name">Wild Lirt Studii</span><br>
+      Built with #00FF88<br>
+      <a href="mailto:nullforgeghost@gmail.com">nullforgeghost@gmail.com</a>
+    </div>
+  </div>
+</aside>
+<div class="sidebar-backdrop" id="backdrop"></div>
+
+<main class="main">
+  <header class="mobile-header">
+    <button class="hamburger" id="hamburger">☰</button>
+    <div class="logo" style="margin-left:16px;">ShipJS</div>
+  </header>
+
+  <div id="landing" class="view active">
+    <div class="container">
+      <div class="hero">
+        <h1>Stop watching. Start shipping.</h1>
+        <p>ShipJS is a test-driven JavaScript course. Write real code. Pass real tests. Deploy real projects.</p>
+        <button class="btn-primary" data-view="dashboard">Start Course →</button>
+      </div>
+      <div class="playground">
+        <div class="editor">
+          <div style="margin-bottom:12px;color:var(--text-muted);font-size:14px;">index.js</div>
+          <textarea id="playgroundCode" class="mono">console.log("I ship");</textarea>
+          <div style="margin-top:12px;"><button class="btn-primary" id="runPlayground">Run →</button></div>
+        </div>
+        <div class="output">
+          <div class="output-header"><span style="font-size:14px;color:var(--text-muted)">Console</span><span style="font-size:12px;color:var(--primary)">✓ Ready</span></div>
+          <div class="console" id="playgroundConsole"><div>> Ready to ship</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="dashboard" class="view">
+    <div class="container">
+      <h2 style="font-size:28px;margin-bottom:24px;">Your Course</h2>
+      <div class="stats">
+        <div class="stat"><div class="stat-value"><span id="totalXp">120</span> XP</div><div style="font-size:14px;color:var(--text-muted)">Total XP</div></div>
+        <div class="stat"><div class="stat-value"><span id="lessonsDone">3</span>/26</div><div style="font-size:14px;color:var(--text-muted)">Lessons Done</div></div>
+        <div class="stat"><div class="stat-value"><span id="projectsDone">1</span>/5</div><div style="font-size:14px;color:var(--text-muted)">Projects Shipped</div></div>
+      </div>
+      <div class="modules" id="modulesContainer"></div>
+    </div>
+  </div>
+
+  <div id="lesson" class="view">
+    <div class="lesson">
+      <div class="lesson-docs" id="lessonDocs"></div>
+      <div class="lesson-code">
+        <div class="code-header">
+          <span class="mono" style="font-size:14px;" id="lessonFileName">app.js</span>
+          <div><button class="btn-ghost" id="hintBtn">Hint 1/3</button><button class="btn-primary" id="runLesson">Run →</button></div>
+        </div>
+        <div class="editor" style="flex:1;padding:16px;"><textarea id="lessonCode" class="mono" style="height:100%;"></textarea></div>
+        <div class="tests" id="testsContainer"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="exam" class="view">
+    <div class="container">
+      <div class="exam-header"><h2>Final Exam — Certified ShipJS Developer</h2><div class="timer" id="timer">45:00</div></div>
+      <div id="examContainer"></div>
+    </div>
+  </div>
+</main>
+
+<div id="leaderboardModal" class="modal-backdrop">
+  <div class="modal">
+    <div class="modal-header"><h3>⚡ Speedrun Leaderboard</h3><button class="modal-close" data-close="leaderboardModal">×</button></div>
+    <div class="modal-body leaderboard">
+      <table><thead><tr><th>Rank</th><th>Shipper</th><th>Time</th><th>Date</th></tr></thead><tbody id="leaderboardBody"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<div id="certModal" class="modal-backdrop">
+  <div class="modal" style="max-width:900px;">
+    <div class="modal-header"><h3>🏆 Certificate Unlocked</h3><button class="modal-close" data-close="certModal">×</button></div>
+    <div class="modal-body">
+      <canvas id="certCanvas" width="1200" height="630" style="width:100%;height:auto;"></canvas>
+      <div id="qr-temp"></div>
+      <div style="display:flex;gap:12px;margin-top:24px;">
+        <button class="btn-primary" style="flex:1;" id="downloadCert">Download PNG</button>
+        <button class="btn-ghost" style="flex:1;" id="shareCert">Share to LinkedIn</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+  <footer class="page-footer">
+  <div class="container">
+    <div class="footer-content">
+      <span class="studio-name">Wild Lirt Studii</span>
+      <span class="footer-sep">•</span>
+      <span>Built with #00FF88</span>
+      <span class="footer-sep">•</span>
+      <a href="mailto:nullforgeghost@gmail.com">nullforgeghost@gmail.com</a>
+    </div>
+  </div>
+  </footer>
+<script src="js/app.js"></script>
+</body>
+  </html>
