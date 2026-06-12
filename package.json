@@ -1,0 +1,23 @@
+{
+  "name": "shipjs",
+  "version": "2.0.0",
+  "description": "Stop watching. Start shipping. Test-driven JS course.",
+  "author": "Wild Lirt Studio <nullforgeghost@gmail.com>",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'No build step needed'",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "@vercel/kv": "^1.0.1",
+    "qrcode": "^1.5.3"
+  },
+  "devDependencies": {
+    "vercel": "^32.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
