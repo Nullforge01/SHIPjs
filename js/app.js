@@ -1,263 +1,213 @@
-const state = {
-  xp: 120, streak: 4, lessonsDone: 3, projectsDone: 1,
-  currentView: 'landing', currentLesson: null, hints: 0,
-  examStart: null, examTimer: null, examPassed: false,
-  passedLessons: new Set()
-};
+export class ShipJS {
+  constructor() {
+    this.state = this.loadState();
+    this.timerInterval = null;
+    this.listeners = {};
+  }
 
-const $ = id => document.getElementById(id);
-const $$ = sel => document.querySelectorAll(sel);
+  async init() {
+    this.startTimer();
+    this.updateStreak();
+    this.bindUI();
+  }
 
-// Nav + Views
-function showView(view) {
-  $$('.view').forEach(v => v.classList.remove('active'));
-  $(view)?.classList.add('active');
-  $$('.nav-item').forEach(n => n.classList.remove('active'));
-  $(`[data-view="${view}"]`)?.classList.add('active');
-  state.currentView = view;
-  if (view === 'dashboard') renderModules();
-  closeSidebar();
-}
+  // --- State Management ---
+  loadState() {
+    const defaultState = {
+      xp: 0,
+      streak: 0,
+      lastActiveDate: null,
+      completed: [], // lesson IDs: ['m1l1', 'm1l2']
+      timeSec: 0,
+      viewedSolutions: [],
+      examPassed: false,
+      certId: null,
+      name: ''
+    };
 
-function openModal(id) { $(id).classList.add('show') }
-function closeModal(id) { $(id).classList.remove('show') }
-function closeSidebar() {
-  $('sidebar').classList.remove('open');
-  $('backdrop').classList.remove('show');
-}
-
-// Toast
-function toast(msg, isErr = false) {
-  const t = $('toast');
-  t.textContent = msg;
-  t.className = `toast show ${isErr ? 'error' : ''}`;
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-// Update UI
-function updateStats() {
-  $('xpCount').textContent = state.xp;
-  $('totalXp').textContent = state.xp;
-  $('streakCount').textContent = state.streak;
-  $('lessonsDone').textContent = state.lessonsDone;
-  $('projectsDone').textContent = state.projectsDone;
-  $('xpFill').style.width = `${(state.xp % 500) / 5}%`;
-  if (state.examPassed) $('navCert').classList.remove('disabled');
-}
-
-// Playground
-$('runPlayground').onclick = () => {
-  const code = $('playgroundCode').value;
-  const con = $('playgroundConsole');
-  con.innerHTML = '';
-  const log = (...args) => con.innerHTML += `<div>> ${args.join(' ')}</div>`;
-  try { new Function('console', code)({ log }); }
-  catch (e) { log('Error:', e.message) }
-};
-
-// Modules from lessons.js
-function renderModules() {
-  const container = $('modulesContainer');
-  container.innerHTML = window.lessonsData.map(mod => {
-    const passed = mod.lessons.filter(l => state.passedLessons.has(l.id)).length;
-    const locked = mod.id !== 'm1' && passed === 0 && !state.passedLessons.has('m1l3');
-    return `
-      <div class="module ${locked ? 'locked' : ''}" data-module="${mod.id}">
-        <h3>${mod.title}</h3>
-        <div class="progress"><div class="progress-bar" style="width:${passed/mod.lessons.length*100}%"></div></div>
-        <div style="font-size:14px;color:var(--text-muted)">${passed}/${mod.lessons.length} lessons</div>
-        <div class="module-actions">
-          <button class="btn-primary" onclick="openLesson('${mod.lessons[0].id}')" ${locked ? 'disabled' : ''}>
-            ${passed ? 'Continue' : 'Start'}
-          </button>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-// Lesson runner
-function openLesson(lessonId) {
-  const lesson = window.lessonsData.flatMap(m => m.lessons).find(l => l.id === lessonId);
-  if (!lesson) return;
-  
-  state.currentLesson = lesson;
-  state.hints = 0;
-  $('hintBtn').textContent = 'Hint 1/3';
-  $('lessonDocs').innerHTML = lesson.docs;
-  $('lessonFileName').textContent = lesson.fileName;
-  $('lessonCode').value = lesson.starterCode;
-  $('testsContainer').innerHTML = lesson.tests.map((t,i) => 
-    `<div class="test" data-test="${i}">○ ${t.name}</div>`
-  ).join('');
-  showView('lesson');
-}
-
-$('runLesson').onclick = () => {
-  if (!state.currentLesson) return;
-  const code = $('lessonCode').value;
-  const logs = [];
-  const mockConsole = { log: (...args) => logs.push(args.join(' ')) };
-  
-  let allPass = true;
-  try {
-    new Function('console', code)(mockConsole);
-    state.currentLesson.tests.forEach((t, i) => {
-      const testEl = $(`[data-test="${i}"]`);
-      const pass = t.test(code, logs);
-      testEl.className = `test ${pass ? 'pass' : 'fail'}`;
-      testEl.innerHTML = `${pass ? '✓' : '✗'} ${t.name}`;
-      if (!pass) allPass = false;
-    });
-    
-    if (allPass && !state.passedLessons.has(state.currentLesson.id)) {
-      state.passedLessons.add(state.currentLesson.id);
-      state.xp += state.currentLesson.xp;
-      state.lessonsDone++;
-      if (state.currentLesson.id.includes('l3')) state.projectsDone++;
-      updateStats();
-      toast(`+${state.currentLesson.xp} XP`);
+    try {
+      const saved = localStorage.getItem('shipjs_state');
+      return saved? {...defaultState,...JSON.parse(saved) } : defaultState;
+    } catch (e) {
+      console.error('Failed to load state:', e);
+      return defaultState;
     }
-  } catch (e) {
-    toast('Error: ' + e.message, true);
-    allPass = false;
   }
-};
 
-$('hintBtn').onclick = () => {
-  if (!state.currentLesson) return;
-  const hint = state.currentLesson.hints[state.hints];
-  if (hint) {
-    toast(`Hint ${state.hints + 1}: ${hint}`);
-    state.hints++;
-    $('hintBtn').textContent = `Hint ${Math.min(state.hints + 1, 3)}/3`;
+  saveState() {
+    localStorage.setItem('shipjs_state', JSON.stringify(this.state));
   }
-};
 
-// Exam
-function startExam() {
-  if (state.lessonsDone < 3) return toast('Complete at least 3 lessons first', true);
-  showView('exam');
-  state.examStart = Date.now();
-  let sec = 45 * 60;
-  clearInterval(state.examTimer);
-  state.examTimer = setInterval(() => {
-    sec--;
-    $('timer').textContent = `${Math.floor(sec/60)}:${(sec%60).toString().padStart(2,'0')}`;
-    if (sec <= 0) endExam(false);
-  }, 1000);
-  
-  $('examContainer').innerHTML = window.examData.map((q,i) => `
-    <div class="exam-card" style="margin-bottom:24px;background:var(--bg-elevated);padding:20px;border-radius:12px;border:1px solid var(--border);">
-      <h4>Q${i+1}: ${q.question}</h4>
-      ${q.type === 'mcq' 
-        ? q.options.map((opt, j) => `
-            <label style="display:block;margin:12px 0;">
-              <input type="radio" name="q${i}" value="${j}"> ${opt}
-            </label>
-          `).join('')
-        : `<textarea id="examCode${i}" class="mono" style="width:100%;height:120px;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:12px;margin-top:12px;">${q.starterCode}</textarea>`
-      }
-    </div>
-  `).join('') + `<button class="btn-primary" onclick="submitExam()">Submit Exam</button>`;
-}
+  getProgress() {
+    return {...this.state };
+  }
 
-function submitExam() {
-  let correct = 0;
-  window.examData.forEach((q, i) => {
-    if (q.type === 'mcq') {
-      const selected = document.querySelector(`input[name="q${i}"]:checked`);
-      if (selected && parseInt(selected.value) === q.answer) correct++;
+  // --- Lesson Logic ---
+  completeLesson(lessonId, xp) {
+    if (this.state.completed.includes(lessonId)) return false;
+
+    this.state.completed.push(lessonId);
+    this.state.xp += xp;
+    this.saveState();
+    this.emit('lesson:complete', { lessonId, xp, totalXp: this.state.xp });
+    return true;
+  }
+
+  markViewedSolution(lessonId) {
+    if (!this.state.viewedSolutions.includes(lessonId)) {
+      this.state.viewedSolutions.push(lessonId);
+      this.saveState();
+    }
+  }
+
+  isLessonComplete(lessonId) {
+    return this.state.completed.includes(lessonId);
+  }
+
+  getCompletedCount() {
+    return this.state.completed.length;
+  }
+
+  // --- XP & Streak ---
+  addXP(amount) {
+    this.state.xp += amount;
+    this.saveState();
+    this.emit('xp:update', { xp: this.state.xp });
+  }
+
+  updateStreak() {
+    const today = new Date().toDateString();
+    const lastActive = this.state.lastActiveDate;
+
+    if (!lastActive) {
+      this.state.streak = 1;
+    } else if (lastActive === today) {
+      return;
     } else {
-      const code = $(`examCode${i}`).value;
-      if (q.test(code)) correct++;
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+
+      if (lastActive === yesterday.toDateString()) {
+        this.state.streak++;
+      } else {
+        this.state.streak = 1;
+      }
     }
-  });
-  const passed = correct >= window.examData.length * 0.7;
-  endExam(passed);
-}
 
-function endExam(passed) {
-  clearInterval(state.examTimer);
-  const time = Math.floor((Date.now() - state.examStart) / 1000);
-  if (passed) {
-    state.examPassed = true; 
-    state.xp += 500; 
-    updateStats();
-    toast('Exam passed! +500 XP');
-    setTimeout(() => openModal('certModal'), 500);
-    generateCert(time);
-  } else {
-    toast('Exam failed. Score 70% to pass.', true);
+    this.state.lastActiveDate = today;
+    this.saveState();
+    this.emit('streak:update', { streak: this.state.streak });
   }
-}
 
-// Certificate - Fixed to Wild Lirt Studio
-function generateCert(timeSec) {
-  const canvas = $('certCanvas'), ctx = canvas.getContext('2d');
-  const name = prompt('Enter your name for the certificate:') || 'ShipJS Developer';
-  const date = new Date().toLocaleDateString();
-  const id = Math.random().toString(36).substring(2, 10).toUpperCase();
-  const time = `${Math.floor(timeSec/60)}:${(timeSec%60).toString().padStart(2,'0')}`;
-  
-  ctx.fillStyle = '#0A0A0B'; ctx.fillRect(0,0,1200,630);
-  ctx.strokeStyle = '#00FF88'; ctx.lineWidth = 4; ctx.strokeRect(20,20,1160,590);
-  
-  ctx.fillStyle = '#00FF88'; ctx.font = 'bold 48px Inter'; ctx.textAlign = 'center';
-  ctx.fillText('Certified ShipJS Developer', 600, 120);
-  
-  ctx.fillStyle = '#FAFAFA'; ctx.font = '32px Inter';
-  ctx.fillText('This certifies that', 600, 200);
-  ctx.fillStyle = '#00FF88'; ctx.font = 'bold 56px Inter';
-  ctx.fillText(name, 600, 280);
-  ctx.fillStyle = '#FAFAFA'; ctx.font = '24px Inter';
-  ctx.fillText('has shipped all lessons and projects', 600, 340);
-  ctx.fillText(`Exam Time: ${time} | Date: ${date}`, 600, 380);
-  ctx.font = '18px JetBrains Mono'; ctx.fillText(`Certificate ID: ${id}`, 600, 420);
-  
-  // QR Code
-  const qrDiv = $('qr-temp');
-  qrDiv.innerHTML = '';
-  new QRCode(qrDiv, { text: `https://shipjs.dev/verify/${id}`, width: 100, height: 100 });
-  setTimeout(() => {
-    const qrImg = qrDiv.querySelector('img');
-    if (qrImg) ctx.drawImage(qrImg, 1050, 480, 100, 100);
-  }, 100);
-  
-  // Wild Lirt Studio footer - FIXED
-  ctx.fillStyle = '#00FF88'; ctx.font = '16px Inter'; ctx.textAlign = 'right';
-  ctx.fillText('Built with #00FF88 by Wild Lirt Studio', 1140, 590);
-  
-  $('downloadCert').onclick = () => {
-    const a = document.createElement('a');
-    a.download = `shipjs-cert-${id}.png`;
-    a.href = canvas.toDataURL();
-    a.click();
-  };
-  $('shareCert').onclick = () => {
-    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=https://shipjs.dev`, '_blank');
-  };
-}
+  // --- Timer ---
+  startTimer() {
+    if (this.timerInterval) return;
 
-// Event delegation
-document.addEventListener('click', e => {
-  const v = e.target.closest('[data-view]');
-  const m = e.target.closest('[data-modal]');
-  const a = e.target.closest('[data-action]');
-  const c = e.target.closest('[data-close]');
-  
-  if (v) showView(v.dataset.view);
-  if (m) openModal(m.dataset.modal);
-  if (a && a.dataset.action === 'openCertificate') {
-    state.examPassed ? openModal('certModal') : toast('Pass the exam first', true);
+    this.timerInterval = setInterval(() => {
+      this.state.timeSec++;
+      if (this.state.timeSec % 5 === 0) this.saveState(); // Save every 5s
+      this.emit('timer:tick', { timeSec: this.state.timeSec });
+    }, 1000);
   }
-  if (c) closeModal(c.dataset.close);
-  if (e.target.id === 'hamburger' || e.target.id === 'backdrop') {
-    $('sidebar').classList.toggle('open');
-    $('backdrop').classList.toggle('show');
-  }
-  if (e.target.closest('[data-view="exam"]')) startExam();
-});
 
-// Init
-updateStats();
+  stopTimer() {
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
+      this.timerInterval = null;
+      this.saveState();
+    }
+  }
+
+  getTimeFormatted() {
+    const m = Math.floor(this.state.timeSec / 60);
+    const s = this.state.timeSec % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  }
+
+  // --- Exam & Cert ---
+  async passExam(name) {
+    this.state.examPassed = true;
+    this.state.name = name;
+    this.saveState();
+
+    try {
+      const res = await fetch('/api/cert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          timeSec: this.state.timeSec,
+          xp: this.state.xp,
+          lessonsCompleted: this.state.completed.length
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        this.state.certId = data.id;
+        this.saveState();
+        this.emit('cert:generated', { certId: data.id });
+        return data;
+      }
+    } catch (err) {
+      console.error('Cert generation failed:', err);
+      this.emit('cert:error', { error: err.message });
+    }
+
+    return null;
+  }
+
+  // --- Event System ---
+  emit(event, data) {
+    window.dispatchEvent(new CustomEvent(`shipjs:${event}`, { detail: data }));
+  }
+
+  on(event, handler) {
+    const wrapped = (e) => handler(e.detail);
+    window.addEventListener(`shipjs:${event}`, wrapped);
+
+    // Store for cleanup
+    if (!this.listeners[event]) this.listeners[event] = [];
+    this.listeners[event].push({ wrapped, handler });
+  }
+
+  off(event, handler) {
+    const list = this.listeners[event];
+    if (!list) return;
+
+    const idx = list.findIndex(l => l.handler === handler);
+    if (idx > -1) {
+      window.removeEventListener(`shipjs:${event}`, list[idx].wrapped);
+      list.splice(idx, 1);
+    }
+  }
+
+  // --- UI Binding ---
+  bindUI() {
+    // Auto-update common elements if they exist
+    this.on('xp:update', ({ xp }) => {
+      document.querySelectorAll('[data-xp]').forEach(el => el.textContent = xp);
+    });
+
+    this.on('timer:tick', ({ timeSec }) => {
+      const m = Math.floor(timeSec / 60);
+      const s = timeSec % 60;
+      const formatted = `${m}:${s.toString().padStart(2, '0')}`;
+      document.querySelectorAll('[data-timer]').forEach(el => el.textContent = formatted);
+    });
+
+    this.on('streak:update', ({ streak }) => {
+      document.querySelectorAll('[data-streak]').forEach(el => el.textContent = streak);
+    });
+  }
+
+  // --- Dev Tools ---
+  reset() {
+    this.stopTimer();
+    localStorage.removeItem('shipjs_state');
+    Object.keys(localStorage).forEach(key => {
+      if (key.startsWith('shipjs_file_')) localStorage.removeItem(key);
+    });
+    window.location.href = '/';
+  }
+      }
