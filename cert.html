@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Certificate — ShipJS</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <div class="wrap">
+      <div class="logo-wrap">
+        <a href="/" class="logo">Ship<span>.js</span></a>
+      </div>
+      <div class="stats">
+        <div class="pill"><span data-xp>0</span> XP</div>
+        <div class="pill"><span data-streak>0</span>🔥</div>
+        <a href="/course.html" class="btn btn-secondary">Back to Course</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="padding: 40px 24px; text-align: center;">
+    <div id="locked" style="display: none;">
+      <h1 style="font-size: 32px; margin-bottom: 16px;">Certificate Locked 🔒</h1>
+      <p class="muted" style="margin-bottom: 24px;">Pass the final exam with 70%+ to unlock your certificate.</p>
+      <a href="/exam.html" class="btn btn-primary">Take Final Exam</a>
+    </div>
+
+    <div id="unlocked" style="display: none;">
+      <h1 style="font-size: 32px; margin-bottom: 8px;">You're Certified 🏆</h1>
+      <p class="muted" style="margin-bottom: 32px;">Congratulations, <span id="cert-name">Shipper</span>. You shipped it.</p>
+      
+      <div class="card" style="max-width: 800px; margin: 0 auto 24px; padding: 0; overflow: hidden;">
+        <img id="cert-img" src="" alt="ShipJS Certificate" style="width: 100%; display: block;">
+      </div>
+
+      <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+        <button id="download-btn" class="btn btn-primary">Download PNG</button>
+        <button id="linkedin-btn" class="btn btn-secondary">Add to LinkedIn</button>
+        <button id="twitter-btn" class="btn btn-secondary">Share on X</button>
+      </div>
+
+      <div class="card" style="max-width: 600px; margin: 40px auto 0; text-align: left;">
+        <h3 style="margin-bottom: 12px;">What's next?</h3>
+        <ul style="color: var(--text-muted); line-height: 1.8;">
+          <li>Add "Certified ShipJS Developer" to your resume</li>
+          <li>Share your certificate on LinkedIn with #ShipJS</li>
+          <li>Build your own projects and keep shipping</li>
+          <li>Help others learn by contributing to open source</li>
+        </ul>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script type="module">
+  import { ShipJS } from './js/app.js';
+  
+  const app = new ShipJS();
+  await app.init();
+  
+  const state = app.getState();
+  const locked = document.getElementById('locked');
+  const unlocked = document.getElementById('unlocked');
+  
+  if (!state.cert.unlocked) {
+    locked.style.display = 'block';
+  } else {
+    unlocked.style.display = 'block';
+    document.getElementById('cert-name').textContent = state.userName;
+    
+    // Load cert image from API
+    const certImg = document.getElementById('cert-img');
+    certImg.src = `/api/cert?name=${encodeURIComponent(state.userName)}&date=${state.cert.date}`;
+    
+    // Download
+    document.getElementById('download-btn').onclick = async () => {
+      const res = await fetch(certImg.src);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ShipJS-Certificate-${state.userName.replace(/\s+/g, '-')}.png`;
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+    
+    // LinkedIn
+    document.getElementById('linkedin-btn').onclick = () => {
+      const text = `I'm officially a Certified ShipJS Developer! 🚀\n\nJust completed the ShipJS course - 26 test-driven lessons, 5 projects shipped, final exam passed.\n\nStop watching. Start shipping.\n\n#ShipJS #JavaScript #WebDev`;
+      const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(location.origin)}&summary=${encodeURIComponent(text)}`;
+      window.open(url, '_blank');
+    };
+    
+    // Twitter/X
+    document.getElementById('twitter-btn').onclick = () => {
+      const text = `I'm a Certified ShipJS Developer 🏆\n\n26 lessons. 5 projects. 1 final exam. All shipped.\n\nStop watching. Start shipping.\n\n#ShipJS`;
+      const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(location.origin)}`;
+      window.open(url, '_blank');
+    };
+  }
+</script>
+</body>
+</html>
