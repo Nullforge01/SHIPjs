@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify Certificate | Ship.js</title>
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+  <div class="container" style="padding-top:48px">
+    <div class="logo-wrap" style="text-align:center;margin-bottom:32px">
+      <a href="/" class="logo" style="font-size:24px;font-weight:800">Ship<span>.js</span></a>
+      <p class="muted">Certificate Verification</p>
+    </div>
+
+    <div id="verify-card" class="card" style="max-width:500px;margin:0 auto">
+      <div id="loading" style="text-align:center;padding:24px">
+        <div class="muted">Checking certificate...</div>
+      </div>
+
+      <div id="valid" style="display:none">
+        <div style="text-align:center;margin-bottom:24px">
+          <div style="width:64px;height:64px;background:#22c55e;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center">
+            <svg width="32" height="32" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20,6 9,17 4,12"></polyline>
+            </svg>
+          </div>
+          <h2 style="color:#22c55e;margin:0 0 8px">Certificate Valid</h2>
+          <p class="muted">Issued by Wild Lirt Studio</p>
+        </div>
+
+        <div class="cert-details">
+          <div class="row">
+            <span class="muted">Certificate ID</span>
+            <span id="cert-id" class="mono"></span>
+          </div>
+          <div class="row">
+            <span class="muted">Issued To</span>
+            <span id="cert-name"></span>
+          </div>
+          <div class="row">
+            <span class="muted">Issue Date</span>
+            <span id="cert-date"></span>
+          </div>
+          <div class="row">
+            <span class="muted">Time to Ship</span>
+            <span id="cert-time"></span>
+          </div>
+          <div class="row">
+            <span class="muted">XP Earned</span>
+            <span id="cert-xp"></span>
+          </div>
+          <div class="row">
+            <span class="muted">Lessons Completed</span>
+            <span id="cert-lessons"></span>
+          </div>
+        </div>
+      </div>
+
+      <div id="invalid" style="display:none;text-align:center">
+        <div style="width:64px;height:64px;background:#ef4444;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center">
+          <svg width="32" height="32" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </div>
+        <h2 style="color:#ef4444;margin:0 0 8px">Certificate Invalid</h2>
+        <p class="muted" id="error-msg">Certificate not found or has been revoked.</p>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:32px">
+      <a href="/" class="btn btn-secondary">Back to Ship.js</a>
+    </div>
+  </div>
+
+  <script>
+    async function verifyCert() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+      
+      if (!id) {
+        showInvalid('No certificate ID provided');
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/verify?id=${id}`);
+        const data = await res.json();
+        
+        if (data.valid) {
+          showValid(data.certificate);
+        } else {
+          showInvalid(data.error || 'Certificate not found');
+        }
+      } catch (err) {
+        showInvalid('Verification service unavailable');
+      }
+    }
+
+    function showValid(cert) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('valid').style.display = 'block';
+      
+      document.getElementById('cert-id').textContent = cert.id;
+      document.getElementById('cert-name').textContent = cert.name;
+      document.getElementById('cert-date').textContent = new Date(cert.date).toLocaleDateString();
+      document.getElementById('cert-time').textContent = formatTime(cert.timeSec);
+      document.getElementById('cert-xp').textContent = `${cert.xp} XP`;
+      document.getElementById('cert-lessons').textContent = `${cert.lessonsCompleted}/26`;
+    }
+
+    function showInvalid(msg) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('invalid').style.display = 'block';
+      document.getElementById('error-msg').textContent = msg;
+    }
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return `${m}m ${s}s`;
+    }
+
+    verifyCert();
+  </script>
+
+  <style>
+    .cert-details .row {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .cert-details .row:last-child { border-bottom: none; }
+  </style>
+</body>
+  </html>
