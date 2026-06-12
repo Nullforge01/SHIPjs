@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Course | Ship.js</title>
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div class="wrap">
+        <div class="logo-wrap">
+          <div class="logo-icon">🚀</div>
+          <a href="/" class="logo">Ship<span>.js</span></a>
+        </div>
+        <div class="stats">
+          <div class="pill"><span id="xp-display">0</span> XP</div>
+          <div class="pill"><span id="streak-display">0</span>🔥</div>
+          <div class="timer"><svg width="16" height="16" fill="currentColor"><path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/></svg><span id="timer-display">0:00</span></div>
+        </div>
+      </div>
+    </header>
+
+    <main id="view-course">
+      <div class="container">
+        <div class="page-header">
+          <h1>Ship.js Course</h1>
+          <p class="muted">26 lessons. Test-driven. Ship code, earn XP.</p>
+          <div class="progress-wrap">
+            <div class="progress-bar">
+              <div id="course-progress" class="progress-fill" style="width:0%"></div>
+            </div>
+            <span id="progress-text" class="muted">0/26 complete</span>
+          </div>
+        </div>
+
+        <div id="modules-grid" class="modules-grid">
+          <div class="muted" style="text-align:center;padding:48px">Loading course...</div>
+        </div>
+
+        <div class="course-footer">
+          <a href="/exam.html" id="exam-btn" class="btn btn-secondary" style="display:none">Take Final Exam →</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { ShipJS } from './js/app.js';
+    
+    const app = new ShipJS();
+    await app.init();
+    
+    // Load course data and render modules
+    const courseData = await fetch('./data/course.json').then(r => r.json());
+    const progress = app.getProgress();
+    
+    renderModules(courseData.modules, progress);
+    updateCourseProgress(progress);
+    
+    function renderModules(modules, progress) {
+      const grid = document.getElementById('modules-grid');
+      grid.innerHTML = '';
+      
+      modules.forEach(module => {
+        const completedInModule = module.lessons.filter(l => 
+          progress.completed.includes(l.id)
+        ).length;
+        const totalInModule = module.lessons.length;
+        const pct = Math.round(completedInModule / totalInModule * 100);
+        
+        const modEl = document.createElement('div');
+        modEl.className = 'module-card card';
+        modEl.innerHTML = `
+          <div class="module-header">
+            <h3>${module.title}</h3>
+            <span class="muted">${completedInModule}/${totalInModule}</span>
+          </div>
+          <div class="progress-bar small">
+            <div class="progress-fill" style="width:${pct}%"></div>
+          </div>
+          <div class="lesson-list">
+            ${module.lessons.map(lesson => {
+              const done = progress.completed.includes(lesson.id);
+              const locked = false; // TODO: add prereq logic
+              return `
+                <a href="/lesson.html?id=${lesson.id}" class="lesson-item ${done ? 'done' : ''} ${locked ? 'locked' : ''}">
+                  <span class="lesson-icon">${done ? '✓' : lesson.type === 'project' ? '🚀' : '▸'}</span>
+                  <span class="lesson-title">${lesson.title}</span>
+                  <span class="lesson-xp">${lesson.xp} XP</span>
+                </a>
+              `;
+            }).join('')}
+          </div>
+        `;
+        grid.appendChild(modEl);
+      });
+    }
+    
+    function updateCourseProgress(progress) {
+      const total = 26;
+      const done = progress.completed.length;
+      const pct = Math.round(done / total * 100);
+      
+      document.getElementById('course-progress').style.width = pct + '%';
+      document.getElementById('progress-text').textContent = `${done}/${total} complete`;
+      document.getElementById('xp-display').textContent = progress.xp;
+      document.getElementById('streak-display').textContent = progress.streak;
+      document.getElementById('timer-display').textContent = formatTime(progress.timeSec);
+      
+      if (done >= total) {
+        document.getElementById('exam-btn').style.display = 'inline-flex';
+      }
+    }
+    
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return `${m}:${s.toString().padStart(2, '0')}`;
+    }
+  </script>
+</body>
+  </html>
