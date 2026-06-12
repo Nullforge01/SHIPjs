@@ -1,0 +1,63 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/**/*.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "*.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "css/**/*.css",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "js/**/*.js",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "data/**/*.json",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/verify",
+      "dest": "/verify.html"
+    },
+    {
+      "src": "/course",
+      "dest": "/course.html"
+    },
+    {
+      "src": "/lesson",
+      "dest": "/lesson.html"
+    },
+    {
+      "src": "/exam",
+      "dest": "/exam.html"
+    },
+    {
+      "src": "/",
+      "dest": "/index.html"
+    }
+  ],
+  "functions": {
+    "api/cert.js": {
+      "maxDuration": 10
+    },
+    "api/verify.js": {
+      "maxDuration": 5
+    }
+  },
+  "env": {
+    "KV_REST_API_URL": "@kv_rest_api_url",
+    "KV_REST_API_TOKEN": "@kv_rest_api_token"
+  }
+}
