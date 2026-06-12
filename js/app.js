@@ -174,7 +174,7 @@ function generateCert(timeSec) {
   
   // Wild Lirt Studii footer
   ctx.fillStyle = '#7C3AED'; ctx.font = '16px Inter'; ctx.textAlign = 'right';
-  ctx.fillText('Built with #00FF88 by Wild Lirt Studii', 1140, 590);
+  ctx.fillText('Built with #00FF88 by Wild Lirt Studio', 1140, 590);
   
   $('downloadCert').onclick = () => {
     const a = document.createElement('a');
