@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>404 — ShipJS</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <div class="wrap">
+      <div class="logo-wrap">
+        <a href="/" class="logo">Ship<span>.js</span></a>
+      </div>
+      <div class="stats">
+        <div class="pill"><span data-xp>0</span> XP</div>
+        <div class="pill"><span data-streak>0</span>🔥</div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="padding: 80px 24px; text-align: center;">
+    <div style="font-size: 120px; font-weight: 700; color: var(--primary); line-height: 1; margin-bottom: 24px;">
+      404
+    </div>
+    
+    <h1 style="font-size: 32px; margin-bottom: 16px;">Page Not Shipped</h1>
+    
+    <p class="muted" style="font-size: 18px; margin-bottom: 40px; max-width: 500px; margin-left: auto; margin-right: auto;">
+      This route doesn't exist. Looks like we haven't shipped this page yet.
+    </p>
+
+    <div class="card" style="max-width: 600px; margin: 0 auto 40px; text-align: left;">
+      <div class="mono" style="font-size: 14px; color: var(--error); margin-bottom: 12px;">
+        Error: Route not found
+      </div>
+      <div class="mono" style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">
+        > GET {location.pathname}<br>
+        > 404 Not Found<br>
+        > Did you mean to ship somewhere else?
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+      <a href="/" class="btn btn-primary">Go Home</a>
+      <a href="/course.html" class="btn btn-secondary">View Course</a>
+      <a href="/exam.html" class="btn btn-secondary">Take Exam</a>
+    </div>
+
+    <div style="margin-top: 60px;">
+      <p class="muted" style="font-size: 14px;">
+        Lost? <a href="mailto:nullforgeghost@gmail.com" style="color: var(--primary);">Contact support</a>
+      </p>
+    </div>
+  </main>
+</div>
+
+<script type="module">
+  import { ShipJS } from './js/app.js';
+  const app = new ShipJS();
+  await app.init();
+</script>
+</body>
+                                       </html>
