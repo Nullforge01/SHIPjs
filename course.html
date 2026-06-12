@@ -1,124 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Course | Ship.js</title>
-  <link rel="stylesheet" href="css/main.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Course — ShipJS</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-  <div id="app">
-    <header class="topbar">
-      <div class="wrap">
-        <div class="logo-wrap">
-          <div class="logo-icon">🚀</div>
-          <a href="/" class="logo">Ship<span>.js</span></a>
+<div id="app">
+  <header class="topbar">
+    <div class="wrap">
+      <div class="logo-wrap">
+        <a href="/" class="logo">Ship<span>.js</span></a>
+      </div>
+      <div class="stats">
+        <div class="pill"><span data-xp>0</span> XP</div>
+        <div class="pill"><span data-streak>0</span>🔥</div>
+        <a href="/exam.html" class="btn btn-secondary">Final Exam</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="padding: 40px 24px;">
+    <div style="margin-bottom: 40px;">
+      <h1 style="font-size: 32px; margin-bottom: 8px;">Your Course</h1>
+      <p class="muted">Test-driven JavaScript. Ship real code.</p>
+    </div>
+
+    <div class="hero-stats" style="margin-bottom: 40px;">
+      <div class="stat">
+        <div class="stat-num"><span data-xp>0</span></div>
+        <div class="stat-label">Total XP</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num"><span id="lessons-done">0</span>/<span id="lessons-total">0</span></div>
+        <div class="stat-label">Lessons Done</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num"><span id="projects-done">0</span>/<span id="projects-total">0</span></div>
+        <div class="stat-label">Projects Shipped</div>
+      </div>
+    </div>
+
+    <div id="modules" class="modules"></div>
+  </main>
+</div>
+
+<script type="module">
+  import { ShipJS } from './js/app.js';
+  
+  const app = new ShipJS();
+  await app.init();
+  
+  const course = await app.loadCourse();
+  const state = app.getState();
+  
+  // Update totals
+  let totalLessons = 0, totalProjects = 0;
+  course.modules.forEach(m => {
+    m.lessons.forEach(l => {
+      totalLessons++;
+      if (l.type === 'project') totalProjects++;
+    });
+  });
+  
+  document.getElementById('lessons-total').textContent = totalLessons;
+  document.getElementById('projects-total').textContent = totalProjects;
+  document.getElementById('lessons-done').textContent = state.progress.length;
+  document.getElementById('projects-done').textContent = state.progress.filter(id => {
+    const lesson = course.modules.flatMap(m => m.lessons).find(l => l.id === id);
+    return lesson?.type === 'project';
+  }).length;
+  
+  // Render modules
+  const modulesEl = document.getElementById('modules');
+  course.modules.forEach((module, i) => {
+    const completed = module.lessons.filter(l => state.progress.includes(l.id)).length;
+    const locked = i > 0 && !course.modules[i-1].lessons.every(l => state.progress.includes(l.id));
+    
+    const card = document.createElement('div');
+    card.className = `card ${locked ? 'locked' : ''}`;
+    card.innerHTML = `
+      <div class="module-header">
+        <div>
+          <h3 style="font-size: 20px; margin-bottom: 4px;">${module.title}</h3>
+          <p class="muted" style="font-size: 14px;">${module.description}</p>
         </div>
-        <div class="stats">
-          <div class="pill"><span id="xp-display">0</span> XP</div>
-          <div class="pill"><span id="streak-display">0</span>🔥</div>
-          <div class="timer"><svg width="16" height="16" fill="currentColor"><path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/></svg><span id="timer-display">0:00</span></div>
+        <div class="muted" style="font-size: 14px;">
+          ${completed}/${module.lessons.length} ${locked ? '🔒' : ''}
         </div>
       </div>
-    </header>
-
-    <main id="view-course">
-      <div class="container">
-        <div class="page-header">
-          <h1>Ship.js Course</h1>
-          <p class="muted">26 lessons. Test-driven. Ship code, earn XP.</p>
-          <div class="progress-wrap">
-            <div class="progress-bar">
-              <div id="course-progress" class="progress-fill" style="width:0%"></div>
-            </div>
-            <span id="progress-text" class="muted">0/26 complete</span>
-          </div>
-        </div>
-
-        <div id="modules-grid" class="modules-grid">
-          <div class="muted" style="text-align:center;padding:48px">Loading course...</div>
-        </div>
-
-        <div class="course-footer">
-          <a href="/exam.html" id="exam-btn" class="btn btn-secondary" style="display:none">Take Final Exam →</a>
-        </div>
+      <div class="lessons" style="display: ${locked ? 'none' : 'block'};">
+        ${module.lessons.map(lesson => {
+          const done = state.progress.includes(lesson.id);
+          return `
+            <a href="/lesson.html?id=${lesson.id}" class="lesson-item ${done ? 'complete' : ''}">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <span>${done ? '✓' : '○'}</span>
+                <span>${lesson.title}</span>
+                ${lesson.type === 'project' ? '<span class="badge">Project</span>' : ''}
+              </div>
+              <span class="muted" style="font-size: 13px;">${lesson.xp} XP</span>
+            </a>
+          `;
+        }).join('')}
       </div>
-    </main>
-  </div>
-
-  <script type="module">
-    import { ShipJS } from './js/app.js';
+    `;
     
-    const app = new ShipJS();
-    await app.init();
-    
-    // Load course data and render modules
-    const courseData = await fetch('./data/course.json').then(r => r.json());
-    const progress = app.getProgress();
-    
-    renderModules(courseData.modules, progress);
-    updateCourseProgress(progress);
-    
-    function renderModules(modules, progress) {
-      const grid = document.getElementById('modules-grid');
-      grid.innerHTML = '';
-      
-      modules.forEach(module => {
-        const completedInModule = module.lessons.filter(l => 
-          progress.completed.includes(l.id)
-        ).length;
-        const totalInModule = module.lessons.length;
-        const pct = Math.round(completedInModule / totalInModule * 100);
-        
-        const modEl = document.createElement('div');
-        modEl.className = 'module-card card';
-        modEl.innerHTML = `
-          <div class="module-header">
-            <h3>${module.title}</h3>
-            <span class="muted">${completedInModule}/${totalInModule}</span>
-          </div>
-          <div class="progress-bar small">
-            <div class="progress-fill" style="width:${pct}%"></div>
-          </div>
-          <div class="lesson-list">
-            ${module.lessons.map(lesson => {
-              const done = progress.completed.includes(lesson.id);
-              const locked = false; // TODO: add prereq logic
-              return `
-                <a href="/lesson.html?id=${lesson.id}" class="lesson-item ${done ? 'done' : ''} ${locked ? 'locked' : ''}">
-                  <span class="lesson-icon">${done ? '✓' : lesson.type === 'project' ? '🚀' : '▸'}</span>
-                  <span class="lesson-title">${lesson.title}</span>
-                  <span class="lesson-xp">${lesson.xp} XP</span>
-                </a>
-              `;
-            }).join('')}
-          </div>
-        `;
-        grid.appendChild(modEl);
-      });
+    if (!locked) {
+      card.querySelector('.module-header').onclick = () => {
+        const lessons = card.querySelector('.lessons');
+        lessons.style.display = lessons.style.display === 'none' ? 'block' : 'none';
+      };
     }
     
-    function updateCourseProgress(progress) {
-      const total = 26;
-      const done = progress.completed.length;
-      const pct = Math.round(done / total * 100);
-      
-      document.getElementById('course-progress').style.width = pct + '%';
-      document.getElementById('progress-text').textContent = `${done}/${total} complete`;
-      document.getElementById('xp-display').textContent = progress.xp;
-      document.getElementById('streak-display').textContent = progress.streak;
-      document.getElementById('timer-display').textContent = formatTime(progress.timeSec);
-      
-      if (done >= total) {
-        document.getElementById('exam-btn').style.display = 'inline-flex';
-      }
-    }
-    
-    function formatTime(sec) {
-      const m = Math.floor(sec / 60);
-      const s = sec % 60;
-      return `${m}:${s.toString().padStart(2, '0')}`;
-    }
-  </script>
+    modulesEl.appendChild(card);
+  });
+</script>
 </body>
-  </html>
+</html>
